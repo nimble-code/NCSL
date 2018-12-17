@@ -1,0 +1,72 @@
+.TH NCSL "1" 05/02/09
+.UC
+.SH NAME
+ncsl - count number of lines of code in a C or C++ program
+.SH SYNOPSIS
+.B ncsl
+[
+.I options
+]
+.B [ file ]*
+.SH DESCRIPTION
+.I Ncsl
+counts the lines of code in a C or C++ program,
+including:
+.nf
+
+	the number of raw lines of code (sloc)
+	the number of non-comment, non-blank lines (ncsl)
+	the number of comments
+
+.fi
+and optionally:
+.nf
+
+	number of statement separators (semicolons and commas)
+
+.fi
+The output is by default generated in
+Unix-style, giving the three or four fields
+defined above per line, similar to the output from
+.IR wc(1) .
+.LP
+If you specify no files,
+.I ncsl
+reads from stdin.
+If you specify more than one file on the command line,
+.I ncsl
+will print the total for each category.
+.TP
+.B \-n
+Show stripped output with line numbers.
+.TP
+.B \-r
+Modifies -n, but uses line numbers from the \f2input\f1 file.
+.TP
+.B \-s
+Show stripped output without linenumbers.
+.TP
+.B -u
+Produce cumulative output for all files, with
+one annotated field per line, instead of the default
+.IR wc(1)
+like output.
+.TP
+.B -v
+Count also semicolons and commas, and add a ratio ncsl:sloc to the -u output.
+.TP
+.B -V
+Print version number and exit.
+.SH EXAMPLES
+.nf
+$ ncsl *.c
+$ ncsl -s ncsl.c
+$ ncsl -n -r ncsl.c
+$ ncsl -u -v ncsl.c
+$ cat ncsl.c | ncsl
+$ cat *.c */*.c | ncsl
+.fi
+.SH AUTHOR
+gerard.holzmann@gmail.com
+.SH SEE ALSO
+.IR wc(1)
