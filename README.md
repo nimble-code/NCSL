@@ -21,7 +21,7 @@ prints the total for each category.
 
 Option -n show stripped output with line numbers.
 
-Option -r modifies -n, using line numbers from the \f2input\f1 file.
+Option -r modifies -n, using line numbers from the _input_ file.
 
 Option -s shows stripped output without linenumbers.
 
