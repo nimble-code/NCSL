@@ -3,7 +3,7 @@
 #include <string.h>
 #include <stdlib.h>
 
-/** simple comment filter and line counter -- gjh 2004 **/
+/** simple comment filter and line counter -- gjh 2004, revised 2019 **/
 
 enum cstate { PLAIN, IN_STRING, IN_QUOTE, S_COMM, COMMENT, CPP_COMMENT, E_COMM };
 
@@ -24,12 +24,6 @@ add_buf(int c)
 	{	buf[column] = c;
 		column++;
 	}
-#if 0
-	if (lastadded == '/' && c == '/'
-	&&  column == 2) /* recognizes only trivial cases */
-	{	nc_linecount--; /* C++ style comment */
-	}
-#endif
 	lastadded = c;
 }
 
@@ -106,12 +100,6 @@ process_file(FILE *fd, char *filename, ...)
 	{	if (c == '\r')
 		{	continue;
 		}
-#if 0
-		if (column < sizeof(buf))
-		{	buf[column] = '\0';
-			fprintf(stderr, "<%c> state %d <%s>\n", c, state, buf);
-		}
-#endif
 		switch (state) {
 		case PLAIN:
 			switch (c) {
@@ -205,45 +193,44 @@ main(int argc, char *argv[])
 			verbose++;
 			break;
 		default:
-			fprintf(stderr, "usage: ncsl [-n] [-s] [-m] *.c\n");
-			fprintf(stderr, "by default, wc-like output with 3 or 4 fields\n");
-			fprintf(stderr, "	field 1: nr of raw lines of input\n");
-			fprintf(stderr, "	field 2: nr of non-blank/non-comment lines\n");
-			fprintf(stderr, "	field 3: nr comments\n");
-			fprintf(stderr, "	field 4: nr of semi-colons and commas\n");
-			fprintf(stderr, "options:\n");
-			fprintf(stderr, " -n show stripped output with numbered lines\n");
-			fprintf(stderr, " -s show stripped output\n");
-			fprintf(stderr, " -u show results one field per line, cumulative\n");
-			fprintf(stderr, " -v add the 4th field of output\n");
+			printf("usage: ncsl [-n] [-s] [-m] *.c\n");
+			printf("by default, wc-like output with 3 or 4 fields\n");
+			printf("	field 1: nr of raw lines of input\n");
+			printf("	field 2: nr of non-blank/non-comment lines\n");
+			printf("	field 3: nr comments\n");
+			printf("	field 4: nr of semi-colons and commas\n");
+			printf("options:\n");
+			printf(" -n show stripped output with numbered lines\n");
+			printf(" -s show stripped output\n");
+			printf(" -u show results one field per line, cumulative\n");
+			printf(" -v add the 4th field of output\n");
 			exit(1);
 		}
 		argv++; argc--;
 	}
 
-	if (unix_style)
-	{	fprintf(stderr, "    sloc     ncsl comments");
+	if (unix_style && !showlines)
+	{	printf("    sloc     ncsl comments");
 		if (verbose)
-		{	fprintf(stderr, "       ;,");
+		{	printf("       ;,");
 		}
 		if (argc > 1)
-		{	fprintf(stderr, "   file");
+		{	printf("   file");
 		}
-		fprintf(stderr, "\n");
+		printf("\n");
 	}
 
 	if (argc == 1)
 	{	process_file(fd, "<stdin>");
 		if (showlines)
-		{	fprintf(stderr, "\n");
-		}
-		if (unix_style)
-		{	fprintf(stderr, "%8d %8d %8d",
+		{	printf("\n");
+		} else if (unix_style)
+		{	printf("%8d %8d %8d",
 				raw, nc_linecount, n_comments);
 			if (verbose)
-			{	fprintf(stderr, " %8d", semi_cnt);
+			{	printf(" %8d", semi_cnt);
 			}
-			fprintf(stderr, "\n");
+			printf("\n");
 		}
 		sum_rw = raw;
 		sum_nc = nc_linecount;
@@ -265,15 +252,14 @@ main(int argc, char *argv[])
 			fclose(fd);
 
 			if (showlines)
-			{	fprintf(stderr, "\n");
-			}
-			if (unix_style)
-			{	fprintf(stderr, "%8d %8d %8d",
+			{	printf("\n");
+			} else if (unix_style)
+			{	printf("%8d %8d %8d",
 					raw, nc_linecount, n_comments);
 				if (verbose)
-				{	fprintf(stderr, " %8d ", semi_cnt);
+				{	printf(" %8d ", semi_cnt);
 				}
-				fprintf(stderr, "  %s\n", argv[1]);
+				printf("  %s\n", argv[1]);
 			}
 			sum_rw += raw; raw = 0;
 			sum_nc += nc_linecount; nc_linecount = 0;
@@ -285,21 +271,21 @@ main(int argc, char *argv[])
 
 	if (unix_style)
 	{	if (nrfiles > 1)
-		{	fprintf(stderr, "%8d %8d %8d",
+		{	printf("%8d %8d %8d",
 				sum_rw, sum_nc, sum_cm);
 			if (verbose)
-			{	fprintf(stderr, " %8d", sum_sm);
+			{	printf(" %8d", sum_sm);
 			}
-			fprintf(stderr, "  total \t[ncsl:sloc %6d%%]\n", (100*sum_nc)/(sum_rw+1));
+			printf("  total \t[ncsl:sloc %6d%%]\n", (100*sum_nc)/(sum_rw+1));
 		}
 	} else
-	{	fprintf(stderr,"SLOC: %6d\t(raw lines of source code)\n", sum_rw);
-		fprintf(stderr,"NCSL: %6d\t(non-comment, non-blank lines of code)\n", sum_nc);
-		fprintf(stderr,"CMNT: %6d\t(nr of comments)\n", sum_cm);
+	{	printf("SLOC: %6d\t(raw lines of source code)\n", sum_rw);
+		printf("NCSL: %6d\t(non-comment, non-blank lines of code)\n", sum_nc);
+		printf("CMNT: %6d\t(nr of comments)\n", sum_cm);
 		if (verbose) {
-		fprintf(stderr,"SSEPS:%6d\t(Statement separators: semicolons and commas)\n", sum_sm);
-		fprintf(stderr,"Ratio:%6d%%\t(NCSL : SLOC)\n", (100*sum_nc)/(sum_rw+1));
-	/*	fprintf(stderr,"TSEMI:%6d\t(Semicolons terminating a line)\n\n", t_semi_cnt); */
+		printf("SSEPS:%6d\t(Statement separators: semicolons and commas)\n", sum_sm);
+		printf("Ratio:%6d%%\t(NCSL : SLOC)\n", (100*sum_nc)/(sum_rw+1));
+	/*	printf("TSEMI:%6d\t(Semicolons terminating a line)\n\n", t_semi_cnt); */
 		}
 	}
 	return 0;
